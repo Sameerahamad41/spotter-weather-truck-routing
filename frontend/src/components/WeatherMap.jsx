@@ -34,8 +34,34 @@ export default function WeatherMap({
   heatmapMode = 'risk', // 'risk', 'wind', 'precip'
   showHeatmap = true,
 }) {
+  const [mapStyle, setMapStyle] = useState('dark'); // 'dark', 'street', 'satellite'
   const activeRoute = routes.find((r) => r.id === selectedRouteId) || routes[0];
   const corridorFrame = corridorTimeline[forecastHourOffset] || [];
+
+  // Reliable, 100% free, watermark-free basemaps requiring ZERO API keys
+  const BASEMAPS = {
+    dark: {
+      name: 'Dark',
+      url: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+      className: 'map-tiles-dark',
+      maxZoom: 19,
+    },
+    street: {
+      name: 'Street',
+      url: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+      className: '',
+      maxZoom: 19,
+    },
+    satellite: {
+      name: 'Satellite',
+      url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+      attribution: 'Tiles &copy; Esri &mdash; Source: Esri, Maxar, Earthstar Geographics',
+      className: '',
+      maxZoom: 18,
+    },
+  };
 
   // Route colors
   const ROUTE_COLORS = {
@@ -94,12 +120,13 @@ export default function WeatherMap({
       >
         <MapBoundsUpdater routes={routes} corridorPoints={corridorFrame} />
 
-        {/* High performance dark carto basemap */}
+        {/* 100% Free, Watermark-Free TileLayer (OpenStreetMap / ESRI) */}
         <TileLayer
-          attribution='&copy; <a href="https://carto.com/">CARTO</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-          url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
-          subdomains="abcd"
-          maxZoom={19}
+          key={mapStyle}
+          attribution={BASEMAPS[mapStyle].attribution}
+          url={BASEMAPS[mapStyle].url}
+          className={BASEMAPS[mapStyle].className}
+          maxZoom={BASEMAPS[mapStyle].maxZoom}
         />
 
         {/* 1. Corridor Weather Heatmap Layer (0–48 hour slider forecast) */}
@@ -311,6 +338,24 @@ export default function WeatherMap({
         <span className="font-semibold text-white">{activeRoute?.name || 'Active Route'}</span>
         <span className="text-slate-500">|</span>
         <span className="font-mono text-cyan-300">{activeRoute?.total_distance_miles} mi</span>
+      </div>
+
+      {/* Map Style Selector Pill (Dark / Street / Satellite) */}
+      <div className="absolute top-3 right-3 z-[1000] bg-slate-900/90 backdrop-blur-md p-1 rounded-xl border border-slate-800 shadow-xl flex items-center space-x-1 text-xs">
+        {Object.entries(BASEMAPS).map(([key, item]) => (
+          <button
+            key={key}
+            type="button"
+            onClick={() => setMapStyle(key)}
+            className={`px-2.5 py-1 rounded-lg transition font-medium cursor-pointer ${
+              mapStyle === key
+                ? 'bg-cyan-500 text-slate-950 font-bold shadow'
+                : 'text-slate-400 hover:text-white hover:bg-slate-800'
+            }`}
+          >
+            {item.name}
+          </button>
+        ))}
       </div>
     </div>
   );
