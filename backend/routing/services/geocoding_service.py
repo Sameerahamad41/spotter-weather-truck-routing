@@ -6,6 +6,7 @@ Uses Open-Meteo Geocoding API with fallback to built-in US transportation hubs.
 import logging
 from typing import Dict, List, Optional
 import requests
+from .http_client import resilient_get
 
 logger = logging.getLogger(__name__)
 
@@ -46,7 +47,7 @@ def search_locations(query: str, limit: int = 5) -> List[Dict]:
             "language": "en",
             "format": "json",
         }
-        resp = requests.get(url, params=params, timeout=4.0)
+        resp = resilient_get(url, params=params, timeout=4.0)
         if resp.status_code == 200:
             data = resp.json()
             for item in data.get("results", []):

@@ -11,6 +11,7 @@ import logging
 import math
 from typing import Dict, List, Optional, Tuple
 import requests
+from .http_client import resilient_get
 
 from .checkpoint_sampler import sample_route_checkpoints, METERS_PER_MILE, haversine_distance_meters
 from .weather_service import fetch_checkpoint_weather_open_meteo, parse_iso_datetime
@@ -68,7 +69,7 @@ def query_osrm_single(coords_list: List[Tuple[float, float]], timeout: float = 5
     try:
         coord_str = ";".join(f"{c[0]:.5f},{c[1]:.5f}" for c in coords_list)
         url = f"https://router.project-osrm.org/route/v1/driving/{coord_str}?overview=full&geometries=geojson&alternatives=false&steps=false"
-        resp = requests.get(url, timeout=timeout)
+        resp = resilient_get(url, timeout=timeout)
         if resp.status_code == 200:
             data = resp.json()
             routes = data.get("routes", [])
@@ -96,7 +97,7 @@ def fetch_three_routes(
     # 1. Try OSRM with alternatives=true
     try:
         url = f"https://router.project-osrm.org/route/v1/driving/{lon1:.5f},{lat1:.5f};{lon2:.5f},{lat2:.5f}?overview=full&geometries=geojson&alternatives=3&steps=false"
-        resp = requests.get(url, timeout=timeout)
+        resp = resilient_get(url, timeout=timeout)
         if resp.status_code == 200:
             data = resp.json()
             routes = data.get("routes", [])

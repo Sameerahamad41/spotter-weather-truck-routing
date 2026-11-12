@@ -10,6 +10,7 @@ import logging
 import math
 from typing import Dict, List, Optional
 import requests
+from .http_client import resilient_get
 
 from .risk_engine import evaluate_checkpoint_risk
 
@@ -61,7 +62,7 @@ def fetch_checkpoint_weather_open_meteo(
                 "forecast_days": 7,
                 "timezone": "UTC",
             }
-            resp = requests.get(url, params=params, timeout=timeout)
+            resp = resilient_get(url, params=params, timeout=timeout)
             if resp.status_code == 200:
                 raw_json = resp.json()
                 # If single location, response is dict; if multiple locations, it's a list

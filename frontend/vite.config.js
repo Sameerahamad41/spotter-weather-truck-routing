@@ -7,8 +7,16 @@ export default defineConfig({
     port: 3000,
     proxy: {
       '/api': {
-        target: 'http://localhost:8000',
+        // Use explicit IPv4 127.0.0.1 to avoid Windows Node IPv6 (::1) ECONNREFUSED mismatch
+        target: 'http://127.0.0.1:8000',
         changeOrigin: true,
+        secure: false,
+        ws: true,
+        configure: (proxy, _options) => {
+          proxy.on('error', (err, _req, _res) => {
+            console.warn('[Vite Proxy Warning]: Could not connect to Django backend at http://127.0.0.1:8000. Ensure "python manage.py runserver" is running.');
+          });
+        },
       },
     },
   },
