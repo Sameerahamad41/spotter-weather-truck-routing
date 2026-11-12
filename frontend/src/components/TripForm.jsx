@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { MapPin, Navigation, Calendar, Clock, Weight, Route, Search, ChevronRight, Sparkles, Loader2 } from 'lucide-react';
+import { API_ENDPOINTS } from '../api';
 
 export default function TripForm({
   onSubmit,
@@ -40,7 +41,7 @@ export default function TripForm({
       return;
     }
     try {
-      const res = await fetch(`/api/geocode/?q=${encodeURIComponent(query)}`);
+      const res = await fetch(API_ENDPOINTS.GEOCODE(query));
       if (res.ok) {
         const data = await res.json();
         setFunc(data);

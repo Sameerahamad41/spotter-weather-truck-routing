@@ -7,6 +7,7 @@ import ForecastSlider from './components/ForecastSlider';
 import CheckpointTimeline from './components/CheckpointTimeline';
 import RiskRulesModal from './components/RiskRulesModal';
 import { AlertCircle, CheckCircle2, ShieldCheck } from 'lucide-react';
+import { API_ENDPOINTS } from './api';
 
 export default function App() {
   const [presets, setPresets] = useState([]);
@@ -21,7 +22,7 @@ export default function App() {
 
   // Load presets on mount
   useEffect(() => {
-    fetch('/api/presets/')
+    fetch(API_ENDPOINTS.PRESETS)
       .then((res) => (res.ok ? res.json() : []))
       .then((data) => {
         setPresets(data);
@@ -44,7 +45,7 @@ export default function App() {
     setIsLoading(true);
     setErrorMessage(null);
     try {
-      const response = await fetch('/api/routes/analyze/', {
+      const response = await fetch(API_ENDPOINTS.ANALYZE, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
